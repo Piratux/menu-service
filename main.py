@@ -2,11 +2,11 @@ import mysql.connector
 import cherrypy
 import pandas as pd
 
+import time
+
 import createDB
 import functionsDB
 import helper
-
-db = mysql.connector.connect(host = 'menu_db', user = 'root', password = 'root', port = 3306)
 
 commands = {
     "add_dish": {
@@ -71,6 +71,9 @@ def parse_user_input(command: str, code: str, param_count: int):
 
 class MyWebService(object):
 
+    def __init__(self, _db):
+        self.db = _db
+
     @cherrypy.expose
     @cherrypy.tools.json_out()
     @cherrypy.tools.json_in()
@@ -89,7 +92,7 @@ class MyWebService(object):
             if params is False:
                 return helper.error_query("bad parameters")
 
-            return functionsDB.add_dish(db, params[0], params[1])
+            return functionsDB.add_dish(self.db, params[0], params[1])
         
         elif command.startswith("delete_dish"):
             params = parse_user_input(command, "delete_dish", commands["delete_dish"]["param_count"])
@@ -97,10 +100,10 @@ class MyWebService(object):
             if params is False:
                 return helper.error_query("bad parameters")
 
-            return functionsDB.delete_dish(db, params[0])
+            return functionsDB.delete_dish(self.db, params[0])
         
         elif command == "get_dishes":
-            return functionsDB.get_dishes(db)
+            return functionsDB.get_dishes(self.db)
         
         elif command.startswith("update_dish"):
             params = parse_user_input(command, "update_dish", commands["update_dish"]["param_count"])
@@ -108,7 +111,7 @@ class MyWebService(object):
             if params is False:
                 return helper.error_query("bad parameters")
 
-            return functionsDB.update_dish(db, params[0], params[1], params[2])
+            return functionsDB.update_dish(self.db, params[0], params[1], params[2])
         
         elif command == "help":
             return get_all_commands()
@@ -117,9 +120,21 @@ class MyWebService(object):
             return helper.error_query("query command doesn't exist")
 
 if __name__ == '__main__':
-    createDB.create_database(db)
-    
-    cherrypy.config.update({'server.socket_host': '0.0.0.0'})
-    cherrypy.config.update({'server.socket_port': 5000})
-    cherrypy.quickstart(MyWebService())
+    # If app loads up before database (as you can't really control that with docker), we should try a few times again later.
+    attempts = 30
+    db_created = False
+    while attempts > 0 and db_created == False:
+        try:
+            db = mysql.connector.connect(host = 'menu_db', user = 'root', password = 'root', port = 3306)
+            db_created = True
+            createDB.create_database(db)
+            cherrypy.config.update({'server.socket_host': '0.0.0.0'})
+            cherrypy.config.update({'server.socket_port': 5000})
+            cherrypy.quickstart(MyWebService(db))
+        except Exception as e:
+            if attempts == 0:
+                print("ERROR: couldn't connect to database")
+                exit
+            attempts = attempts - 1
+            time.sleep(1)
     

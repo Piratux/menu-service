@@ -11,6 +11,6 @@ services:
         container_name: menu_service
         links:
             - "db"
-        image: piratux/menu-web-service
+        build: ./
         ports:
             - "5000:5000"
