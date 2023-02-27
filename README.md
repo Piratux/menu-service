@@ -1,5 +1,5 @@
 # menu-service
-A simple web service that implements CRUD operations on dish menu database.
+A simple Python+MySql web service that implements CRUD operations on dish menu database.
 
 ## How to run it yourself
 ```bash
