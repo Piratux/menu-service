@@ -1,0 +1,16 @@
+version: "3"
+services:
+    db:
+        container_name: menu_db
+        image: mysql:5.7
+        ports:
+            - "3306:3306"
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+    service:
+        container_name: menu_service
+        links:
+            - "db"
+        build: ./
+        ports:
+            - "5000:5000"
