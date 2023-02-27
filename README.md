@@ -18,7 +18,6 @@ You should see something like this:
 "{\"result\":{\"0\":\"(1, Decimal('4.20'), 'Sea weed')\",\"1\":\"(2, Decimal('0.69'), 'Pop corn')\"}}"
 ```
 
-
 ## Prettifying output
 The curl command above spits out barely readable json. But if you're on linux you can do this:
 ```bash
@@ -34,3 +33,5 @@ You should see something like this
   }
 }
 ```
+
+## Making modifications
