@@ -37,7 +37,7 @@ You should see something like this
 Notes:
 - All queries are sent and received in json format.
 - 2 or more query arguments must be seperated with comma "," symbol.
-- comma "," symbol is not allowed in arguments (such as dish name).
+- Comma "," symbol is not allowed in arguments (such as dish name).
 ### List supported queries
 ```bash
 curl -d "{\"query\" : \"help\"}" -H "Content-Type: application/json" -X POST http://127.0.0.1:5000/process
