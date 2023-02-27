@@ -33,4 +33,45 @@ You should see something like this
 }
 ```
 
+## All supported query examples
+Notes:
+- All queries are sent and received in json format.
+- 2 or more query arguments must be seperated with comma "," symbol.
+- comma "," symbol is not allowed in arguments (such as dish name).
+### List supported queries
+```bash
+curl -d "{\"query\" : \"help\"}" -H "Content-Type: application/json" -X POST http://127.0.0.1:5000/process
+```
+### Get dishes
+Returns array of dishes with each entry containing (dish_id, price, name).
+```bash
+curl -d "{\"query\" : \"get_dishes\"}" -H "Content-Type: application/json" -X POST http://127.0.0.1:5000/process
+```
+### Add dish [price, name]
+```bash
+curl -d "{\"query\" : \"add_dish 8.90, Ham Burger\"}" -H "Content-Type: application/json" -X POST http://127.0.0.1:5000/process
+```
+### Delete dish [dish_id]
+```bash
+curl -d "{\"query\" : \"delete_dish 1\"}" -H "Content-Type: application/json" -X POST http://127.0.0.1:5000/process
+```
+### Update dish [dish_id, price, name]
+```bash
+curl -d "{\"query\" : \"update_dish 2, 78.91, Chicken Noodles\"}" -H "Content-Type: application/json" -X POST http://127.0.0.1:5000/process
+```
+
 ## Making modifications
+To edit the project and build it, in `docker-compose.yml` change
+```yml
+image: piratux/menu-web-service
+```
+to
+```yml
+build: ./
+```
+then run
+```bash
+docker-compose build
+docker-compose stop
+docker-compose up -d
+```
