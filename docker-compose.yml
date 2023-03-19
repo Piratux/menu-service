@@ -11,6 +11,8 @@ services:
             test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost"]
             timeout: 4s
             retries: 60
+        volumes:
+            - ./menu_service_db:/var/lib/mysql
     service:
         container_name: menu_service
         links:
@@ -19,5 +21,9 @@ services:
             db:
                 condition: service_healthy
         image: piratux/menu-web-service
+        # build: .
         ports:
             - "5000:5000"
+
+volumes:
+    menu_service_db:
