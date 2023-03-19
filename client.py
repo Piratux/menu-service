@@ -1,4 +1,5 @@
 import requests
+from requests.exceptions import ConnectionError
 import json
 
 endpoint = 'http://127.0.0.1:5000/'
@@ -96,57 +97,61 @@ def print_response(response):
         print(response.text)
 
 while True:
-    print("\n\n")
-    print_all_commands()
-    print("\n")
-    command = input("Please enter your command: ")
+    try:
+        print("\n\n")
+        print_all_commands()
+        print("\n")
+        command = input("Please enter your command: ")
+        
+        if False:
+            print("")
+            # empty
+        
+        elif command == "get_dishes":
+            print_response(get("dishes"))
+        
+        elif command == "delete_dishes":
+            print_response(delete("dishes"))
+        
+        elif command == "get_dish":
+            dish_id = input("Enter dish id: ")
+            print_response(get("dishes/" + str(dish_id)))
+        
+        elif command == "add_dish":
+            price = input("Enter dish price: ")
+            name = input("Enter dish name: ")
+            ingredients = input("Enter ingredient names seperated by ',': ").split(",")
+            ingredients = [s.strip() for s in ingredients if s != ""]
+            print_response(post("dishes", {"price": price, "name": name, "ingredients": ingredients}))
+        
+        elif command == "update_dish":
+            dish_id = input("Enter dish id: ")
+            price = input("Enter dish price: ")
+            name = input("Enter dish name: ")
+            print_response(patch("dishes/" + str(dish_id), {"price": price, "name": name}))
+        
+        elif command == "delete_dish":
+            dish_id = input("Enter dish id: ")
+            print_response(delete("dishes/" + str(dish_id)))
+        
+        elif command == "dish_ingredients":
+            dish_id = input("Enter dish id: ")
+            print_response(get("dishes/" + str(dish_id) + "/ingredients"))
+        
+        elif command == "add_ingredient":
+            dish_id = input("Enter dish id: ")
+            name = input("Enter ingredient name: ")
+            print_response(post("dishes/" + str(dish_id) + "/ingredients", {"name": name}))
+        
+        elif command == "delete_ingredients":
+            dish_id = input("Enter dish id: ")
+            print_response(delete("dishes/" + str(dish_id) + "/ingredients"))
+        
+        elif command == "exit":
+            break;
+        
+        else:
+            print("Invalid command");
     
-    if False:
-        print("")
-        # empty
-    
-    elif command == "get_dishes":
-        print_response(get("dishes"))
-    
-    elif command == "delete_dishes":
-        print_response(delete("dishes"))
-    
-    elif command == "get_dish":
-        dish_id = input("Enter dish id: ")
-        print_response(get("dishes/" + str(dish_id)))
-    
-    elif command == "add_dish":
-        price = input("Enter dish price: ")
-        name = input("Enter dish name: ")
-        ingredients = input("Enter ingredient names seperated by ',': ").split(",")
-        ingredients = [s.strip() for s in ingredients if s != ""]
-        print_response(post("dishes", {"price": price, "name": name, "ingredients": ingredients}))
-    
-    elif command == "update_dish":
-        dish_id = input("Enter dish id: ")
-        price = input("Enter dish price: ")
-        name = input("Enter dish name: ")
-        print_response(patch("dishes/" + str(dish_id), {"price": price, "name": name}))
-    
-    elif command == "delete_dish":
-        dish_id = input("Enter dish id: ")
-        print_response(delete("dishes/" + str(dish_id)))
-    
-    elif command == "dish_ingredients":
-        dish_id = input("Enter dish id: ")
-        print_response(get("dishes/" + str(dish_id) + "/ingredients"))
-    
-    elif command == "add_ingredient":
-        dish_id = input("Enter dish id: ")
-        name = input("Enter ingredient name: ")
-        print_response(post("dishes/" + str(dish_id) + "/ingredients", {"name": name}))
-    
-    elif command == "delete_ingredients":
-        dish_id = input("Enter dish id: ")
-        print_response(delete("dishes/" + str(dish_id) + "/ingredients"))
-    
-    elif command == "exit":
-        break;
-    
-    else:
-        print("Invalid command");
+    except ConnectionError:
+        print("Can't connect to server")
