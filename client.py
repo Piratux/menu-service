@@ -35,7 +35,7 @@ commands = {
     },
     "add_ingredient": {
         "com_description": "Add dish ingredient",
-        "arg_description": "[id]",
+        "arg_description": "[id, name]",
     },
     "delete_ingredients": {
         "com_description": "Delete dish ingredients",
