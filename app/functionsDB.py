@@ -1,5 +1,6 @@
 import mysql.connector
 import simplejson
+import datetime
 
 import helper
 
@@ -8,6 +9,7 @@ MENU_TABLE = 'menu'
 INGREDIENT_TABLE = 'ingredient'
 
 MENU_MAX_NAME_LENGTH = 250
+MENU_MAX_LINK_LENGTH = 250
 
 def get_dishes(db):
     cursor = db.cursor()
@@ -63,21 +65,29 @@ def get_dish(db, dish_id):
     
     return helper.to_json(rows)
 
-def add_dish(db, price, name, ingredients =[]):
+def add_dish(db, price, name, image_link, cooking_time, ingredients = []):
     try:
         price = float(price)
     except ValueError:
         return helper.error_query("price must be convertible to float")
     
-    if len(name) > MENU_MAX_NAME_LENGTH:
-        return helper.error_query("name can't be longer than " + str(MENU_MAX_NAME_LENGTH))
-    
     if price <= 0:
         return helper.error_query("price can't be negative or 0")
     
+    if len(name) > MENU_MAX_NAME_LENGTH:
+        return helper.error_query("name can't be longer than " + str(MENU_MAX_NAME_LENGTH))
+    
+    if len(image_link) > MENU_MAX_LINK_LENGTH:
+        return helper.error_query("image link can't be longer than " + str(MENU_MAX_LINK_LENGTH))
+    
+    try:
+        cooking_time = datetime.datetime.strptime(cooking_time, "%H:%M:%S")
+    except ValueError:
+        return helper.error_query("cooking time must have time format: 'HH:MM:SS'")
+    
     cursor = db.cursor()
-    sql = "INSERT INTO " + MENU_TABLE + " (price, name) VALUES (%s,%s)"
-    val = (price, name)
+    sql = "INSERT INTO " + MENU_TABLE + " (price, name, image_link, cooking_time) VALUES (%s,%s,%s,%s)"
+    val = (price, name, image_link, cooking_time)
     cursor.execute(sql, val)
     db.commit()
     
@@ -88,26 +98,29 @@ def add_dish(db, price, name, ingredients =[]):
     
     return get_dish(db, cursor.lastrowid)
 
-def update_dish(db, dish_id, price, name):
-    try:
-        dish_id = int(dish_id)
-    except ValueError:
-        return helper.error_query("dish_id must be convertible to int")
-    
+def update_dish(db, dish_id, price, name, image_link, cooking_time):
     try:
         price = float(price)
     except ValueError:
         return helper.error_query("price must be convertible to float")
     
-    if len(name) > MENU_MAX_NAME_LENGTH:
-        return helper.error_query("name can't be longer than " + str(MENU_MAX_NAME_LENGTH))
-    
     if price <= 0:
         return helper.error_query("price can't be negative or 0")
     
+    if len(name) > MENU_MAX_NAME_LENGTH:
+        return helper.error_query("name can't be longer than " + str(MENU_MAX_NAME_LENGTH))
+    
+    if len(image_link) > MENU_MAX_LINK_LENGTH:
+        return helper.error_query("image link can't be longer than " + str(MENU_MAX_LINK_LENGTH))
+    
+    try:
+        cooking_time = datetime.datetime.strptime(cooking_time, "%H:%M:%S")
+    except ValueError:
+        return helper.error_query("cooking time must have time format: 'HH:MM:SS'")
+    
     cursor = db.cursor()
-    sql = "UPDATE " + MENU_TABLE + " SET price = %s, name = %s WHERE id = %s"
-    val = (price, name, dish_id)
+    sql = "UPDATE " + MENU_TABLE + " SET price = %s, name = %s, image_link = %s, cooking_time = %s WHERE id = %s"
+    val = (price, name, image_link, cooking_time, dish_id)
     cursor.execute(sql, val)
     db.commit()
     

@@ -11,6 +11,8 @@ def create_database(mydb):
         id int NOT NULL AUTO_INCREMENT,
         price DECIMAL(13, 2) NOT NULL,
         name CHAR(255) NOT NULL,
+        image_link CHAR(255) NOT NULL,
+        cooking_time TIME NOT NULL,
         PRIMARY KEY (id)
     )'''
     cursor.execute(query)
@@ -28,5 +30,5 @@ def create_database(mydb):
     )'''
     cursor.execute(query)
     
-    functionsDB.add_dish(mydb, '4.20', 'Sea weed', ['Water', 'Weed'])
-    functionsDB.add_dish(mydb, '0.69', 'Pop corn', ['Corn'])
+    functionsDB.add_dish(mydb, '4.20', 'Sea weed', 'http://myimagestorage.com/sea_weed.png', '00:15:00', ['Water', 'Weed'])
+    functionsDB.add_dish(mydb, '0.69', 'Pop corn', 'http://myimagestorage.com/pop_corn.png', '00:03:15', ['Corn'])

@@ -19,11 +19,11 @@ commands = {
     },
     "add_dish": {
         "com_description": "Add dish",
-        "arg_description": "[price, name]",
+        "arg_description": "[price, name, image_link, cooking_time]",
     },
     "update_dish": {
         "com_description": "Update dish",
-        "arg_description": "[id, price, name]",
+        "arg_description": "[id, price, name, image_link, cooking_time]",
     },
     "delete_dish": {
         "com_description": "Delete dish",
@@ -120,15 +120,19 @@ while True:
         elif command == "add_dish":
             price = input("Enter dish price: ")
             name = input("Enter dish name: ")
+            image_link = input("Enter image link: ")
+            cooking_time = input("Enter cooking time: ")
             ingredients = input("Enter ingredient names seperated by ',': ").split(",")
             ingredients = [s.strip() for s in ingredients if s != ""]
-            print_response(post("dishes", {"price": price, "name": name, "ingredients": ingredients}))
+            print_response(post("dishes", {"price": price, "name": name, "image_link": image_link, "cooking_time": cooking_time, "ingredients": ingredients}))
         
         elif command == "update_dish":
             dish_id = input("Enter dish id: ")
             price = input("Enter dish price: ")
             name = input("Enter dish name: ")
-            print_response(patch("dishes/" + str(dish_id), {"price": price, "name": name}))
+            image_link = input("Enter image link: ")
+            cooking_time = input("Enter cooking time: ")
+            print_response(patch("dishes/" + str(dish_id), {"price": price, "name": name, "image_link": image_link, "cooking_time": cooking_time}))
         
         elif command == "delete_dish":
             dish_id = input("Enter dish id: ")

@@ -31,20 +31,20 @@ class WebService(object):
     def add_dish(self):
         cherrypy.response.status = 200
         query = cherrypy.request.json
-        if not all(k in query for k in ("price", "name", "ingredients")):
-            return helper.error_query("payload must contain arguments: 'price', 'name', 'ingredients'")
+        if not all(k in query for k in ("price", "name", "image_link", "cooking_time", "ingredients")):
+            return helper.error_query("payload must contain arguments: 'price', 'name', 'image_link', 'cooking_time', 'ingredients'")
         
-        return functionsDB.add_dish(self.db, query["price"], query["name"], query["ingredients"])
+        return functionsDB.add_dish(self.db, query["price"], query["name"], query["image_link"], query["cooking_time"], query["ingredients"])
     
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
     def update_dish(self, dish_id):
         cherrypy.response.status = 200
         query = cherrypy.request.json
-        if not all(k in query for k in ("price", "name")):
-            return helper.error_query("payload must contain arguments: 'price', 'name'")
+        if not all(k in query for k in ("price", "name", "image_link", "cooking_time")):
+            return helper.error_query("payload must contain arguments: 'price', 'name', 'image_link', 'cooking_time'")
         
-        return functionsDB.update_dish(self.db, dish_id, query["price"], query["name"])
+        return functionsDB.update_dish(self.db, dish_id, query["price"], query["name"], query["image_link"], query["cooking_time"])
     
     @cherrypy.tools.json_out()
     def delete_dish(self, dish_id):
