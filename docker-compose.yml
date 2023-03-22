@@ -20,8 +20,8 @@ services:
         depends_on:
             db:
                 condition: service_healthy
-        image: piratux/menu-web-service
-        # build: .
+        # image: piratux/menu-web-service
+        build: .
         ports:
             - "5000:5000"
 
