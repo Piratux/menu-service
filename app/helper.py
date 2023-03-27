@@ -2,7 +2,7 @@ import simplejson
 import cherrypy
 
 def to_json(result):
-    return result
+    return simplejson.loads(simplejson.dumps(result, default=str))
 
 def error_query(error_msg = '', error_status = 400):
     cherrypy.response.status = error_status
@@ -10,3 +10,4 @@ def error_query(error_msg = '', error_status = 400):
 
 def error_query_404():
     return error_query("resource does not exist", 404)
+

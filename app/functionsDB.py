@@ -57,13 +57,16 @@ def get_dish(db, dish_id):
         return helper.error_query_404()
     
     row_headers=[x[0] for x in cursor.description]
-    rows = []
-    for x in result:
-        d = dict(zip(row_headers, x))
-        d["ingredients"] = _get_dish_ingredients(db, dish_id)
-        rows.append(d)
+    # rows = []
+    # for x in result:
+        # d = dict(zip(row_headers, x))
+        # d["ingredients"] = _get_dish_ingredients(db, dish_id)
+        # rows.append(d)
     
-    return helper.to_json(rows)
+    d = dict(zip(row_headers, result[0]))
+    d["ingredients"] = _get_dish_ingredients(db, dish_id)
+    
+    return helper.to_json(d)
 
 def add_dish(db, price, name, image_link, cooking_time, ingredients = []):
     try:
