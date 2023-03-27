@@ -10,7 +10,7 @@ docker-compose up -d
 
 ## Test it out
 ```bash
-curl -X GET http://127.0.0.1:5000/dishes
+curl -X GET http://127.0.0.1:5000/
 ```
 
 ## Try service with python client
