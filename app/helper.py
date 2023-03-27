@@ -10,4 +10,3 @@ def error_query(error_msg = '', error_status = 400):
 
 def error_query_404():
     return error_query("resource does not exist", 404)
-
