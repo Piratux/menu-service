@@ -90,7 +90,7 @@ class WebService(object):
 
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
-    def dishes_id_ingredients(self):
+    def dishes_id_ingredients(self, dish_id):
         method = cherrypy.request.method
         if method == 'GET':
             cherrypy.response.status = 200
