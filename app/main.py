@@ -45,7 +45,7 @@ class WebService(object):
             return functionsDB.get_dishes(self.db)
             
         elif method == 'POST':
-            cherrypy.response.status = 200
+            cherrypy.response.status = 201
             query = cherrypy.request.json
             if not all(k in query for k in ("price", "name", "image_link", "cooking_time", "ingredients")):
                 return helper.error_query("payload must contain arguments: 'price', 'name', 'image_link', 'cooking_time', 'ingredients'")
@@ -97,7 +97,7 @@ class WebService(object):
             return functionsDB.get_dish_ingredients(self.db, dish_id)
             
         elif method == 'POST':
-            cherrypy.response.status = 200
+            cherrypy.response.status = 201
             query = cherrypy.request.json
             if not all(k in query for k in ("name", )):
                 return helper.error_query("payload must contain arguments: 'name'")
