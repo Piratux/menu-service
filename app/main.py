@@ -33,8 +33,7 @@ class WebService(object):
             }
             
         else:
-            cherrypy.response.status = 405
-            return
+            return helper.error_query("method not allowed", 405)
 
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
@@ -59,8 +58,7 @@ class WebService(object):
                 return result
             
         else:
-            cherrypy.response.status = 405
-            return
+            return helper.error_query("method not allowed", 405)
 
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
@@ -85,8 +83,7 @@ class WebService(object):
                 return result
             
         else:
-            cherrypy.response.status = 405
-            return
+            return helper.error_query("method not allowed", 405)
 
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
@@ -111,8 +108,7 @@ class WebService(object):
                 return result
             
         else:
-            cherrypy.response.status = 405
-            return
+            return helper.error_query("method not allowed", 405)
 
 def jsonify_error(status, message, traceback, version):
     return simplejson.dumps(helper.error_query(message, status))
