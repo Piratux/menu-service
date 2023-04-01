@@ -23,11 +23,15 @@ class WebService(object):
                     },
                     {
                         "path": "/dishes/{dish_id}",
-                        "methods": ["GET", "PATCH", "DELETE"]
+                        "methods": ["GET", "PUT", "DELETE"]
                     },
                     {
                         "path": "/dishes/{dish_id}/ingredients",
-                        "methods": ["GET", "POST", "DELETE"]
+                        "methods": ["GET", "POST"]
+                    },
+                    {
+                        "path": "/dishes/{dish_id}/ingredients/{ingredient_id}",
+                        "methods": ["GET", "PUT", "DELETE"]
                     }
                 ]
             }
@@ -46,10 +50,15 @@ class WebService(object):
         elif method == 'POST':
             cherrypy.response.status = 201
             query = cherrypy.request.json
-            if not all(k in query for k in ("price", "name", "image_link", "cooking_time", "ingredients")):
-                return helper.error_query("payload must contain arguments: 'price', 'name', 'image_link', 'cooking_time', 'ingredients'")
+            if not all(k in query for k in ("price", "name", "image_link", "cooking_time")):
+                return helper.error_query("payload must contain arguments: 'price', 'name', 'image_link', 'cooking_time'")
             
-            return functionsDB.add_dish(self.db, query["price"], query["name"], query["image_link"], query["cooking_time"], query["ingredients"])
+            result = functionsDB.add_dish(self.db, query["price"], query["name"], query["image_link"], query["cooking_time"])
+            if cherrypy.response.status == 201:
+                dish_id = result["id"]
+                cherrypy.response.headers['Content-Location'] = "/dishes/" + str(dish_id)
+            
+            return result
             
         elif method == 'DELETE':
             cherrypy.response.status = 204
@@ -68,7 +77,7 @@ class WebService(object):
             cherrypy.response.status = 200
             return functionsDB.get_dish(self.db, dish_id)
             
-        elif method == 'PATCH':
+        elif method == 'PUT':
             cherrypy.response.status = 200
             query = cherrypy.request.json
             if not all(k in query for k in ("price", "name", "image_link", "cooking_time")):
@@ -96,20 +105,45 @@ class WebService(object):
         elif method == 'POST':
             cherrypy.response.status = 201
             query = cherrypy.request.json
-            if not all(k in query for k in ("name", )):
-                return helper.error_query("payload must contain arguments: 'name'")
+            if not all(k in query for k in ("name", "amount")):
+                return helper.error_query("payload must contain arguments: 'name', 'amount'")
             
-            return functionsDB.add_dish_ingredient(self.db, dish_id, query["name"])
+            result = functionsDB.add_dish_ingredient(self.db, dish_id, query["name"], query["amount"])
+            if cherrypy.response.status == 201:
+                ingredient_id = result["id"]
+                cherrypy.response.headers['Content-Location'] = "/dishes/" + str(dish_id) + "/ingredients/" + str(ingredient_id)
+            
+            return result
+            
+        else:
+            return helper.error_query("method not allowed", 405)
+    
+    @cherrypy.tools.json_in()
+    @cherrypy.tools.json_out()
+    def dishes_id_ingredients_id(self, dish_id, ingredient_id):
+        method = cherrypy.request.method
+        if method == 'GET':
+            cherrypy.response.status = 200
+            return functionsDB.get_dish_ingredient(self.db, dish_id, ingredient_id)
+            
+        elif method == 'PUT':
+            cherrypy.response.status = 200
+            query = cherrypy.request.json
+            if not all(k in query for k in ("name", "amount")):
+                return helper.error_query("payload must contain arguments: 'name', 'amount'")
+            
+            return functionsDB.update_dish_ingredient(self.db, dish_id, ingredient_id, query["name"], query["amount"])
             
         elif method == 'DELETE':
             cherrypy.response.status = 204
-            result = functionsDB.delete_dish_ingredients(self.db, dish_id)
+            result = functionsDB.delete_dish_ingredient(self.db, dish_id, ingredient_id)
             if cherrypy.response.status != 204:
                 return result
             
         else:
             return helper.error_query("method not allowed", 405)
-
+    
+    
 def jsonify_error(status, message, traceback, version):
     return simplejson.dumps(helper.error_query(message, status))
 
@@ -147,6 +181,13 @@ if __name__ == '__main__':
             name='dishes',
             route='/dishes/{dish_id}/ingredients',
             action='dishes_id_ingredients',
+            controller=WebService(db)
+        )
+        
+        dispatcher.connect(
+            name='dishes',
+            route='/dishes/{dish_id}/ingredients/{ingredient_id}',
+            action='dishes_id_ingredients_id',
             controller=WebService(db)
         )
         
