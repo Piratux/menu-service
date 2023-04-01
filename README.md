@@ -13,12 +13,6 @@ docker-compose up -d
 curl -X GET http://127.0.0.1:5000/
 ```
 
-## Try service with python client
-```bash
-pip install requests
-py client.py
-```
-
 ## Making modifications
 To edit the project and build it, in `docker-compose.yml` change
 ```yml
