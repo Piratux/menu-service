@@ -8,6 +8,9 @@ cd menu-service
 docker-compose up -d
 ```
 
+## Documentation
+https://documenter.getpostman.com/view/26799355/2s93XsWkQ8
+
 ## Test it out
 ```bash
 curl -X GET http://127.0.0.1:5000/
