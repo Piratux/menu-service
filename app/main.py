@@ -9,35 +9,6 @@ import helper
 class WebService(object):
     def __init__(self, _db):
         self.db = _db
-    
-    @cherrypy.tools.json_out()
-    def index(self):
-        method = cherrypy.request.method
-        if method == 'GET':
-            cherrypy.response.status = 200
-            return {
-                "methods": [
-                    {
-                        "path": "/dishes",
-                        "methods": ["GET", "POST", "DELETE"]
-                    },
-                    {
-                        "path": "/dishes/{dish_id}",
-                        "methods": ["GET", "PUT", "DELETE"]
-                    },
-                    {
-                        "path": "/dishes/{dish_id}/ingredients",
-                        "methods": ["GET", "POST"]
-                    },
-                    {
-                        "path": "/dishes/{dish_id}/ingredients/{ingredient_id}",
-                        "methods": ["GET", "PUT", "DELETE"]
-                    }
-                ]
-            }
-            
-        else:
-            return helper.error_query("method not allowed", 405)
 
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
@@ -155,13 +126,6 @@ if __name__ == '__main__':
         cherrypy.config.update({'server.socket_port': 5000})
         
         dispatcher = cherrypy.dispatch.RoutesDispatcher()
-        
-        dispatcher.connect(
-            name='index',
-            route='/',
-            action='index',
-            controller=WebService(db)
-        )
         
         dispatcher.connect(
             name='dishes',
