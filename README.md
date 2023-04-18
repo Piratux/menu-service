@@ -17,17 +17,7 @@ curl -X GET http://127.0.0.1:5000/dishes
 ```
 
 ## Making modifications
-To edit the project and build it, in `docker-compose.yml` change
-```yml
-image: piratux/menu-web-service
-# build: .
-```
-to
-```yml
-# image: piratux/menu-web-service
-build: .
-```
-then run
+To edit the project and build it run
 ```bash
 docker-compose build
 docker-compose stop service -t 1
