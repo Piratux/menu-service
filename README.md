@@ -17,7 +17,7 @@ curl -X GET http://127.0.0.1:5000/dishes
 ```
 
 ## Making modifications
-To edit the project and build it run
+After making edits, project can be rebuilt and restarted as such
 ```bash
 docker-compose build
 docker-compose stop service -t 1
