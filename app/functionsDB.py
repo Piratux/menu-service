@@ -329,3 +329,18 @@ def delete_dish_ingredient(db, dish_id, ingredient_id, ignore_dish_id = False):
     val = (ingredient_id, )
     cursor.execute(sql, val)
     db.commit()
+
+def get_ingredients(db):
+    cursor = db.cursor()
+    sql = "SELECT id, name, amount FROM " + INGREDIENT_TABLE
+    cursor.execute(sql)
+    result = cursor.fetchall()
+
+    row_headers=[x[0] for x in cursor.description]
+    rows = []
+    for x in result:
+        d = dict(zip(row_headers, x))
+        rows.append(d)
+    
+    return helper.to_json(rows)
+    
