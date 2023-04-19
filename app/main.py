@@ -113,7 +113,7 @@ class WebService(object):
             
         else:
             return helper.error_query("method not allowed", 405)
-    '''
+
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
     def ingredients(self):
@@ -149,7 +149,7 @@ class WebService(object):
             
         else:
             return helper.error_query("method not allowed", 405)
-'''
+
     
 def jsonify_error(status, message, traceback, version):
     return simplejson.dumps(helper.error_query(message, status))
@@ -191,7 +191,7 @@ if __name__ == '__main__':
             controller=WebService(db)
         )
         
-        '''
+        
         dispatcher.connect(
             name='ingredients',
             route='/ingredients',
@@ -205,7 +205,7 @@ if __name__ == '__main__':
             action='ingredients_id',
             controller=WebService(db)
         )
-        '''
+        
         
         conf = {
             '/': {
