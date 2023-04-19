@@ -232,16 +232,17 @@ def get_dish_ingredients(db, dish_id):
     
     return helper.to_json(rows)
 
-def get_dish_ingredient(db, dish_id, ingredient_id):
-    try:
-        dish_id = int(dish_id)
-    except TypeError:
-        return helper.error_query("dish_id must be convertible to int")
-    except ValueError:
-        return helper.error_query_404()
+def get_dish_ingredient(db, dish_id, ingredient_id, ignore_dish_id = False):
+    if not ignore_dish_id:
+        try:
+            dish_id = int(dish_id)
+        except TypeError:
+            return helper.error_query("dish_id must be convertible to int")
+        except ValueError:
+            return helper.error_query_404()
     
-    if not _dish_exists(db, dish_id):
-        return helper.error_query_404()
+        if not _dish_exists(db, dish_id):
+            return helper.error_query_404()
     
     try:
         ingredient_id = int(ingredient_id)
@@ -251,8 +252,8 @@ def get_dish_ingredient(db, dish_id, ingredient_id):
         return helper.error_query_404()
     
     cursor = db.cursor()
-    sql = "SELECT id, name, amount FROM " + INGREDIENT_TABLE + " WHERE id = %s AND dish_id = %s"
-    val = (ingredient_id, dish_id)
+    sql = "SELECT id, name, amount FROM " + INGREDIENT_TABLE + " WHERE id = %s"
+    val = (ingredient_id)
     cursor.execute(sql, val)
     result = cursor.fetchall()
     
@@ -265,16 +266,17 @@ def get_dish_ingredient(db, dish_id, ingredient_id):
     
     return helper.to_json(d)
 
-def update_dish_ingredient(db, dish_id, ingredient_id, name, amount):
-    try:
-        dish_id = int(dish_id)
-    except TypeError:
-        return helper.error_query("dish_id must be convertible to int")
-    except ValueError:
-        return helper.error_query_404()
-    
-    if not _dish_exists(db, dish_id):
-        return helper.error_query_404()
+def update_dish_ingredient(db, dish_id, ingredient_id, name, amount, ignore_dish_id = False):
+    if not ignore_dish_id:
+        try:
+            dish_id = int(dish_id)
+        except TypeError:
+            return helper.error_query("dish_id must be convertible to int")
+        except ValueError:
+            return helper.error_query_404()
+
+        if not _dish_exists(db, dish_id):
+            return helper.error_query_404()
     
     try:
         ingredient_id = int(ingredient_id)
@@ -301,18 +303,19 @@ def update_dish_ingredient(db, dish_id, ingredient_id, name, amount):
     cursor.execute(sql, val)
     db.commit()
     
-    return get_dish_ingredient(db, dish_id, ingredient_id)
+    return get_dish_ingredient(db, dish_id, ingredient_id, ignore_dish_id)
 
-def delete_dish_ingredient(db, dish_id, ingredient_id):
-    try:
-        dish_id = int(dish_id)
-    except TypeError:
-        return helper.error_query("dish_id must be convertible to int")
-    except ValueError:
-        return helper.error_query_404()
-    
-    if not _dish_exists(db, dish_id):
-        return helper.error_query_404()
+def delete_dish_ingredient(db, dish_id, ingredient_id, ignore_dish_id = False):
+    if not ignore_dish_id:
+        try:
+            dish_id = int(dish_id)
+        except TypeError:
+            return helper.error_query("dish_id must be convertible to int")
+        except ValueError:
+            return helper.error_query_404()
+
+        if not _dish_exists(db, dish_id):
+            return helper.error_query_404()
     
     try:
         ingredient_id = int(ingredient_id)
