@@ -113,6 +113,44 @@ class WebService(object):
             
         else:
             return helper.error_query("method not allowed", 405)
+        
+            @cherrypy.tools.json_out()
+    
+    @cherrypy.tools.json_in()
+    @cherrypy.tools.json_out()
+    def ingredients(self):
+        method = cherrypy.request.method
+        if method == 'GET':
+            cherrypy.response.status = 200
+            return functionsDB.get_ingredients(self.db)
+            
+        else:
+            return helper.error_query("method not allowed", 405)
+    
+    @cherrypy.tools.json_in()
+    @cherrypy.tools.json_out()
+    def ingredients_id(self, ingredient_id):
+        method = cherrypy.request.method
+        if method == 'GET':
+            cherrypy.response.status = 200
+            return functionsDB.get_dish_ingredient(self.db, -1, ingredient_id, True)
+            
+        elif method == 'PUT':
+            cherrypy.response.status = 200
+            query = cherrypy.request.json
+            if not all(k in query for k in ("name", "amount")):
+                return helper.error_query("payload must contain arguments: 'name', 'amount'")
+            
+            return functionsDB.update_dish_ingredient(self.db, -1, ingredient_id, query["name"], query["amount"], True)
+            
+        elif method == 'DELETE':
+            cherrypy.response.status = 204
+            result = functionsDB.delete_dish_ingredient(self.db, -1, ingredient_id, True)
+            if cherrypy.response.status != 204:
+                return result
+            
+        else:
+            return helper.error_query("method not allowed", 405)
     
     
 def jsonify_error(status, message, traceback, version):
@@ -152,6 +190,20 @@ if __name__ == '__main__':
             name='dishes',
             route='/dishes/{dish_id}/ingredients/{ingredient_id}',
             action='dishes_id_ingredients_id',
+            controller=WebService(db)
+        )
+        
+        dispatcher.connect(
+            name='ingredients',
+            route='/ingredients',
+            action='ingredients',
+            controller=WebService(db)
+        )
+        
+        dispatcher.connect(
+            name='ingredients',
+            route='/ingredients/{ingredient_id}',
+            action='ingredients_id',
             controller=WebService(db)
         )
         
