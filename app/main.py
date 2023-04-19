@@ -113,8 +113,6 @@ class WebService(object):
             
         else:
             return helper.error_query("method not allowed", 405)
-        
-            @cherrypy.tools.json_out()
     
     @cherrypy.tools.json_in()
     @cherrypy.tools.json_out()
