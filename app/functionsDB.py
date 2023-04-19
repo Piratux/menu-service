@@ -253,7 +253,7 @@ def get_dish_ingredient(db, dish_id, ingredient_id, ignore_dish_id = False):
     
     cursor = db.cursor()
     sql = "SELECT id, name, amount FROM " + INGREDIENT_TABLE + " WHERE id = %s"
-    val = (ingredient_id)
+    val = (ingredient_id, )
     cursor.execute(sql, val)
     result = cursor.fetchall()
     
