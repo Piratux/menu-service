@@ -21,21 +21,21 @@ class WebService(object):
         elif method == 'POST':
             cherrypy.response.status = 201
             query = cherrypy.request.json
-            if not all(k in query for k in ("price", "name", "image_link", "cooking_time")):
-                return helper.error_query("payload must contain arguments: 'price', 'name', 'image_link', 'cooking_time'")
+            if not all(k in query for k in ("price", "name", "image_link", "cooking_time", "author")):
+                return helper.error_query("payload must contain arguments: 'price', 'name', 'image_link', 'cooking_time', 'author'")
             
-            result = functionsDB.add_dish(self.db, query["price"], query["name"], query["image_link"], query["cooking_time"])
+            if not isinstance(query["author"], dict):
+                return helper.error_query("payload author must be dictionary")
+            
+            if not all(k in query["author"] for k in ("name", "surname")):
+                return helper.error_query("payload author must contain arguments: 'name', 'surname'")
+
+            result = functionsDB.add_dish(self.db, query["price"], query["name"], query["image_link"], query["cooking_time"], query["author"]["name"], query["author"]["surname"])
             if cherrypy.response.status == 201:
                 dish_id = result["id"]
                 cherrypy.response.headers['Content-Location'] = "/dishes/" + str(dish_id)
             
             return result
-            
-        elif method == 'DELETE':
-            cherrypy.response.status = 204
-            functionsDB.delete_dishes(self.db)
-            if cherrypy.response.status != 204:
-                return result
             
         else:
             return helper.error_query("method not allowed", 405)
@@ -51,10 +51,16 @@ class WebService(object):
         elif method == 'PUT':
             cherrypy.response.status = 200
             query = cherrypy.request.json
-            if not all(k in query for k in ("price", "name", "image_link", "cooking_time")):
-                return helper.error_query("payload must contain arguments: 'price', 'name', 'image_link', 'cooking_time'")
+            if not all(k in query for k in ("price", "name", "image_link", "cooking_time", "author")):
+                return helper.error_query("payload must contain arguments: 'price', 'name', 'image_link', 'cooking_time', 'author'")
             
-            return functionsDB.update_dish(self.db, dish_id, query["price"], query["name"], query["image_link"], query["cooking_time"])
+            if not isinstance(query["author"], dict):
+                return helper.error_query("payload author must be dictionary")
+            
+            if not all(k in query["author"] for k in ("name", "surname")):
+                return helper.error_query("payload author must contain arguments: 'name', 'surname'")
+
+            return functionsDB.update_dish(self.db, dish_id, query["price"], query["name"], query["image_link"], query["cooking_time"], query["author"]["name"], query["author"]["surname"])
             
         elif method == 'DELETE':
             cherrypy.response.status = 204
@@ -150,7 +156,7 @@ class WebService(object):
         else:
             return helper.error_query("method not allowed", 405)
 
-    
+
 def jsonify_error(status, message, traceback, version):
     return simplejson.dumps(helper.error_query(message, status))
 
@@ -191,7 +197,6 @@ if __name__ == '__main__':
             controller=WebService(db)
         )
         
-        
         dispatcher.connect(
             name='ingredients',
             route='/ingredients',
@@ -205,7 +210,6 @@ if __name__ == '__main__':
             action='ingredients_id',
             controller=WebService(db)
         )
-        
         
         conf = {
             '/': {
@@ -223,4 +227,3 @@ if __name__ == '__main__':
 
     except Exception as e:
         print(e)
-    

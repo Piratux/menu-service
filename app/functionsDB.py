@@ -1,15 +1,27 @@
-import mysql.connector
-import simplejson
 import datetime
+import requests
+from requests.exceptions import ConnectionError
 
 import helper
 
 DB_NAME = 'restaurant_db'
 MENU_TABLE = 'menu'
 INGREDIENT_TABLE = 'ingredient'
+AUTHORS_TABLE = 'authors'
 
 MENU_MAX_NAME_LENGTH = 250
 MENU_MAX_LINK_LENGTH = 250
+
+def _get_dish_author_id(db, dish_id):
+    cursor = db.cursor()
+    sql = "SELECT author_id FROM " + MENU_TABLE + " WHERE id = %s"
+    val = (dish_id, )
+    cursor.execute(sql, val)
+    result = cursor.fetchall()
+
+    row_headers=[x[0] for x in cursor.description]
+
+    return dict(zip(row_headers, result[0]))["author_id"]
 
 def get_dishes(db):
     cursor = db.cursor()
@@ -21,24 +33,11 @@ def get_dishes(db):
     rows = []
     for x in result:
         d = dict(zip(row_headers, x))
+        d["author"] = get_author(d["author_id"])
+        d.pop("author_id")
         rows.append(d)
     
     return helper.to_json(rows)
-
-def delete_dishes(db):
-    cursor = db.cursor()
-
-    sql = "SET FOREIGN_KEY_CHECKS = 0"
-    cursor.execute(sql)
-    
-    sql = "TRUNCATE TABLE " + INGREDIENT_TABLE
-    cursor.execute(sql)
-    
-    sql = "TRUNCATE TABLE " + MENU_TABLE
-    cursor.execute(sql)
-    
-    sql = "SET FOREIGN_KEY_CHECKS = 1"
-    cursor.execute(sql)
 
 def get_dish(db, dish_id):
     try:
@@ -60,10 +59,12 @@ def get_dish(db, dish_id):
     row_headers=[x[0] for x in cursor.description]
     
     d = dict(zip(row_headers, result[0]))
-    
+    d["author"] = get_author(d["author_id"])
+    d.pop("author_id")
+
     return helper.to_json(d)
 
-def add_dish(db, price, name, image_link, cooking_time):
+def add_dish(db, price, name, image_link, cooking_time, author_name, author_surname):
     try:
         price = float(price)
     except (ValueError, TypeError):
@@ -92,9 +93,25 @@ def add_dish(db, price, name, image_link, cooking_time):
     except ValueError:
         return helper.error_query("cooking time must have time format: 'HH:MM:SS'")
     
+    if not isinstance(author_name, str):
+        return helper.error_query("author['name'] must be string")
+
+    if not isinstance(author_surname, str):
+        return helper.error_query("author['surname'] must be string")
+
+    if len(author_name) > MENU_MAX_NAME_LENGTH:
+        return helper.error_query("author['name'] can't be longer than " + str(MENU_MAX_NAME_LENGTH))
+    
+    if len(author_surname) > MENU_MAX_NAME_LENGTH:
+        return helper.error_query("author['surname'] can't be longer than " + str(MENU_MAX_NAME_LENGTH))
+
+    author_id = add_author(author_name, author_surname)
+    if author_id == None:
+        return helper.error_query("internal service error", 500)
+
     cursor = db.cursor()
-    sql = "INSERT INTO " + MENU_TABLE + " (price, name, image_link, cooking_time, ingredients) VALUES (%s,%s,%s,%s,%s)"
-    val = (price, name, image_link, cooking_time, "")
+    sql = "INSERT INTO " + MENU_TABLE + " (price, name, image_link, cooking_time, ingredients, author_id) VALUES (%s,%s,%s,%s,%s,%s)"
+    val = (price, name, image_link, cooking_time, "", author_id)
     cursor.execute(sql, val)
     db.commit()
     
@@ -107,7 +124,7 @@ def add_dish(db, price, name, image_link, cooking_time):
     
     return get_dish(db, dish_id)
 
-def update_dish(db, dish_id, price, name, image_link, cooking_time):
+def update_dish(db, dish_id, price, name, image_link, cooking_time, author_name, author_surname):
     try:
         dish_id = int(dish_id)
     except TypeError:
@@ -143,11 +160,26 @@ def update_dish(db, dish_id, price, name, image_link, cooking_time):
     except ValueError:
         return helper.error_query("cooking time must have time format: 'HH:MM:SS'")
     
+    if not isinstance(author_name, str):
+        return helper.error_query("author['name'] must be string")
+
+    if not isinstance(author_surname, str):
+        return helper.error_query("author['surname'] must be string")
+
+    if len(author_name) > MENU_MAX_NAME_LENGTH:
+        return helper.error_query("author['name'] can't be longer than " + str(MENU_MAX_NAME_LENGTH))
+    
+    if len(author_surname) > MENU_MAX_NAME_LENGTH:
+        return helper.error_query("author['surname'] can't be longer than " + str(MENU_MAX_NAME_LENGTH))
+
     cursor = db.cursor()
     sql = "UPDATE " + MENU_TABLE + " SET price = %s, name = %s, image_link = %s, cooking_time = %s WHERE id = %s"
     val = (price, name, image_link, cooking_time, dish_id)
     cursor.execute(sql, val)
     db.commit()
+
+    author_id = _get_dish_author_id(db, dish_id)
+    update_author(author_id, author_name, author_surname)
     
     return get_dish(db, dish_id)
 
@@ -159,6 +191,9 @@ def delete_dish(db, dish_id):
     except ValueError:
         return helper.error_query_404()
     
+    author_id = _get_dish_author_id(db, dish_id)
+    delete_author(author_id)
+
     cursor = db.cursor()
     sql = "DELETE FROM " + MENU_TABLE + " WHERE id = %s"
     val = (dish_id, )
@@ -343,4 +378,51 @@ def get_ingredients(db):
         rows.append(d)
     
     return helper.to_json(rows)
-    
+
+# --------------------------------------------------------
+# Wrapper functions for foreign authors service
+# --------------------------------------------------------
+
+def add_author(name, surname):
+    endpoint = 'http://library_service:80/api/Authors'
+    try:
+        request_result = requests.post(endpoint, json = {'name': name, 'surname': surname})
+        if request_result.status_code == 201:
+            return request_result.json()['id']
+        else:
+            return None
+    except ConnectionError:
+        return None
+
+def get_author(author_id):
+    endpoint = 'http://library_service:80/api/Authors/' + str(author_id)
+    try:
+        request_result = requests.get(endpoint)
+        if request_result.status_code == 200:
+            return request_result.json()
+        else:
+            return None
+    except ConnectionError:
+        return None
+
+def update_author(author_id, name, surname):
+    endpoint = 'http://library_service:80/api/Authors/' + str(author_id)
+    try:
+        request_result = requests.put(endpoint, json = {'name': name, 'surname': surname})
+        if request_result.status_code == 200:
+            return request_result.json()
+        else:
+            return None
+    except ConnectionError:
+        return None
+
+def delete_author(author_id):
+    endpoint = 'http://library_service:80/api/Authors/' + str(author_id)
+    try:
+        request_result = requests.delete(endpoint)
+        if request_result.status_code == 200:
+            return request_result.json()
+        else:
+            return None
+    except ConnectionError:
+        return None

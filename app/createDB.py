@@ -8,22 +8,23 @@ def create_database(db):
 
     query = '''
     CREATE TABLE ''' + functionsDB.MENU_TABLE + ''' (
-        id int NOT NULL AUTO_INCREMENT,
+        id INT NOT NULL AUTO_INCREMENT,
         price DECIMAL(13, 2) NOT NULL,
         name CHAR(255) NOT NULL,
         image_link CHAR(255) NOT NULL,
         ingredients CHAR(255) NOT NULL,
         cooking_time TIME NOT NULL,
+        author_id INT NOT NULL,
         PRIMARY KEY (id)
     )'''
     cursor.execute(query)
 
     query = '''
     CREATE TABLE ''' + functionsDB.INGREDIENT_TABLE + ''' (
-        id int NOT NULL AUTO_INCREMENT,
+        id INT NOT NULL AUTO_INCREMENT,
         name CHAR(255) NOT NULL,
         amount CHAR(255) NOT NULL,
-        dish_id int NOT NULL,
+        dish_id INT NOT NULL,
         PRIMARY KEY (id),
         FOREIGN KEY (dish_id)
             REFERENCES ''' + functionsDB.MENU_TABLE + ''' (id)
@@ -32,8 +33,8 @@ def create_database(db):
     )'''
     cursor.execute(query)
     
-    functionsDB.add_dish(db, '4.20', 'Sea weed', 'http://myimagestorage.com/sea_weed.png', '00:15:00')
-    functionsDB.add_dish(db, '0.69', 'Pop corn', 'http://myimagestorage.com/pop_corn.png', '00:03:15')
+    functionsDB.add_dish(db, '4.20', 'Sea weed', 'http://myimagestorage.com/sea_weed.png', '00:15:00', 'John', 'Johnson')
+    functionsDB.add_dish(db, '0.69', 'Pop corn', 'http://myimagestorage.com/pop_corn.png', '00:03:15', 'Mark', 'Markson')
     
     functionsDB.add_dish_ingredient(db, 1, 'Water', '150ml')
     functionsDB.add_dish_ingredient(db, 1, 'Weed', '40g')
