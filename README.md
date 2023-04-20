@@ -1,5 +1,6 @@
 # menu-service
 A simple REST Python + MySQL web service that implements CRUD operations on dish menu database.
+Using author service as dependence from here: https://github.com/VytenisKaj/LibraryWebService
 
 ## How to run it yourself
 ```bash
