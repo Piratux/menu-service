@@ -41,8 +41,8 @@ services:
     library:
         container_name: library_service
         build: ./LibraryWebService
-        ports:
-            - "5001:80"
+        # ports:
+        #     - "5001:80"
         depends_on:
             db:
                 condition: service_healthy

@@ -419,10 +419,6 @@ def update_author(author_id, name, surname):
 def delete_author(author_id):
     endpoint = 'http://library_service:80/api/Authors/' + str(author_id)
     try:
-        request_result = requests.delete(endpoint)
-        if request_result.status_code == 200:
-            return request_result.json()
-        else:
-            return None
+        requests.delete(endpoint)
     except ConnectionError:
         return None
