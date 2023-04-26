@@ -171,15 +171,17 @@ def update_dish(db, dish_id, price, name, image_link, cooking_time, author_name,
     
     if len(author_surname) > MENU_MAX_NAME_LENGTH:
         return helper.error_query("author['surname'] can't be longer than " + str(MENU_MAX_NAME_LENGTH))
-
+    
+    author_id = _get_dish_author_id(db, dish_id)
+    result = update_author(author_id, author_name, author_surname)
+    if result == None:
+        return helper.error_query("internal service error", 500)
+    
     cursor = db.cursor()
     sql = "UPDATE " + MENU_TABLE + " SET price = %s, name = %s, image_link = %s, cooking_time = %s WHERE id = %s"
     val = (price, name, image_link, cooking_time, dish_id)
     cursor.execute(sql, val)
     db.commit()
-
-    author_id = _get_dish_author_id(db, dish_id)
-    update_author(author_id, author_name, author_surname)
     
     return get_dish(db, dish_id)
 
