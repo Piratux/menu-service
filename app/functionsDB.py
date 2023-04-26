@@ -192,7 +192,9 @@ def delete_dish(db, dish_id):
         return helper.error_query_404()
     
     author_id = _get_dish_author_id(db, dish_id)
-    delete_author(author_id)
+    result = delete_author(author_id)
+    if author_id == -1:
+        return helper.error_query("internal service error", 500)
 
     cursor = db.cursor()
     sql = "DELETE FROM " + MENU_TABLE + " WHERE id = %s"
@@ -420,5 +422,8 @@ def delete_author(author_id):
     endpoint = 'http://library_service:80/api/Authors/' + str(author_id)
     try:
         requests.delete(endpoint)
+        return 0
     except ConnectionError:
-        return None
+        return -1
+    except Exception as e:
+        return 0
