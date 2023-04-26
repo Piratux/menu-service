@@ -18,10 +18,12 @@ def _get_dish_author_id(db, dish_id):
     val = (dish_id, )
     cursor.execute(sql, val)
     result = cursor.fetchall()
-
-    row_headers=[x[0] for x in cursor.description]
-
-    return dict(zip(row_headers, result[0]))["author_id"]
+    
+    if len(result) > 0:
+        row_headers=[x[0] for x in cursor.description]
+        return dict(zip(row_headers, result[0]))["author_id"]
+    else:
+        return None
 
 def get_dishes(db):
     cursor = db.cursor()
@@ -173,6 +175,9 @@ def update_dish(db, dish_id, price, name, image_link, cooking_time, author_name,
         return helper.error_query("author['surname'] can't be longer than " + str(MENU_MAX_NAME_LENGTH))
     
     author_id = _get_dish_author_id(db, dish_id)
+    if author_id == None:
+        return helper.error_query_404()
+        
     result = update_author(author_id, author_name, author_surname)
     if result == None:
         return helper.error_query("internal service error", 500)
@@ -194,6 +199,9 @@ def delete_dish(db, dish_id):
         return helper.error_query_404()
     
     author_id = _get_dish_author_id(db, dish_id)
+    if author_id == None:
+        return None
+    
     result = delete_author(author_id)
     if author_id == -1:
         return helper.error_query("internal service error", 500)
@@ -410,6 +418,9 @@ def get_author(author_id):
         return None
 
 def update_author(author_id, name, surname):
+    if author_id == None:
+        return None
+    
     endpoint = 'http://library_service:80/api/Authors/' + str(author_id)
     try:
         request_result = requests.put(endpoint, json = {'name': name, 'surname': surname})
